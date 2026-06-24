@@ -92,51 +92,32 @@
     }
     .toggle-row {
       display: flex;
-      gap: 8px;
+      gap: 6px;
       flex-wrap: wrap;
       align-items: center;
     }
     .toggle-row label {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
-      padding: 7px 14px;
+      justify-content: center;
+      padding: 6px 14px;
       border-radius: 999px;
-      border: 1.5px solid #d1d5db;
-      background: #fff;
+      border: 1.5px solid #e5e7eb;
+      background: #f9fafb;
       font-size: 13px;
       font-weight: 600;
       color: #9ca3af;
       cursor: pointer;
-      transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
       user-select: none;
-      opacity: 0.75;
+      white-space: nowrap;
+      line-height: 1.3;
     }
-    .toggle-row label::before {
-      content: "";
-      width: 16px;
-      height: 16px;
-      flex-shrink: 0;
-      border: 1.5px solid currentColor;
-      border-radius: 4px;
-      background-color: transparent;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: 13px;
-      transition: background 0.15s, border-color 0.15s;
-    }
-    .toggle-row label:hover { border-color: #9ca3af; color: #6b7280; opacity: 1; }
+    .toggle-row label:hover { color: #4b5563; border-color: #d1d5db; }
     .toggle-row label:has(input:checked) {
       background: #1a3a2a;
       color: #fff;
       border-color: #1a3a2a;
-      opacity: 1;
-      box-shadow: 0 1px 4px rgba(26,58,42,0.18);
-    }
-    .toggle-row label:has(input:checked)::before {
-      background-color: #fff;
-      border-color: #fff;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='%231a3a2a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/></svg>");
     }
     .toggle-row label:focus-within {
       outline: 2px solid #2d5a3d;
@@ -242,16 +223,15 @@
       .controls { padding: 12px 14px 10px; }
       #søk { padding: 10px 14px; font-size: 15px; margin-bottom: 9px; }
       .filter-btn { padding: 7px 13px; font-size: 12.5px; }
-      .toggle-row { gap: 6px; }
       .toggle-row label {
         flex: 1 1 0;
-        justify-content: center;
-        padding: 10px 12px;
-        font-size: 13.5px;
+        padding: 7px 10px;
+        font-size: 13px;
+        min-width: 0;
       }
       #teller {
         flex: 1 0 100%;
-        margin: 4px 0 0;
+        margin: 6px 0 0;
         text-align: right;
       }
 
@@ -328,7 +308,7 @@
   <div class="filter-row" id="filter-row"></div>
   <div class="toggle-row">
     <label><input type="checkbox" id="vis-festival" checked> Festival-stands</label>
-    <label><input type="checkbox" id="vis-restaurant" checked> 🍽 Gladmat på restaurant</label>
+    <label><input type="checkbox" id="vis-restaurant" checked> 🍽 Restauranter</label>
     <span id="teller"></span>
   </div>
 </div>
