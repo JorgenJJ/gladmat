@@ -92,19 +92,63 @@
     }
     .toggle-row {
       display: flex;
-      gap: 16px;
+      gap: 8px;
       flex-wrap: wrap;
       align-items: center;
     }
     .toggle-row label {
-      display: flex;
+      display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 8px;
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid #d1d5db;
+      background: #fff;
       font-size: 13px;
+      font-weight: 600;
+      color: #9ca3af;
       cursor: pointer;
-      color: #374151;
+      transition: background 0.15s, color 0.15s, border-color 0.15s, opacity 0.15s;
+      user-select: none;
+      opacity: 0.75;
     }
-    .toggle-row input[type=checkbox] { accent-color: #1a3a2a; }
+    .toggle-row label::before {
+      content: "";
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      border: 1.5px solid currentColor;
+      border-radius: 4px;
+      background-color: transparent;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 13px;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .toggle-row label:hover { border-color: #9ca3af; color: #6b7280; opacity: 1; }
+    .toggle-row label:has(input:checked) {
+      background: #1a3a2a;
+      color: #fff;
+      border-color: #1a3a2a;
+      opacity: 1;
+      box-shadow: 0 1px 4px rgba(26,58,42,0.18);
+    }
+    .toggle-row label:has(input:checked)::before {
+      background-color: #fff;
+      border-color: #fff;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><path fill='none' stroke='%231a3a2a' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' d='M3.5 8.5l3 3 6-6'/></svg>");
+    }
+    .toggle-row label:focus-within {
+      outline: 2px solid #2d5a3d;
+      outline-offset: 2px;
+    }
+    .toggle-row input[type=checkbox] {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
     #teller {
       margin-left: auto;
       font-size: 12px;
@@ -147,21 +191,14 @@
       padding: 11px 14px;
       border-top: 2px solid #1a3a2a;
     }
-    tr.group-head.rest td {
-      background: #eef2fb;
-      color: #1e40af;
-      border-top-color: #1e40af;
-    }
     .rest-label {
       display: inline-block;
-      font-size: 11px;
-      font-weight: 600;
-      color: #1e40af;
-      background: #dbeafe;
-      padding: 1px 9px;
-      border-radius: 9999px;
-      margin-right: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #6b7280;
+      margin-left: 10px;
       vertical-align: middle;
+      letter-spacing: 0.1px;
     }
 
     tbody tr.dish { border-bottom: 1px solid #e5e7eb; }
@@ -198,6 +235,26 @@
 
     /* Mobil: tabell → kort, ingen horisontal scroll */
     @media (max-width: 640px) {
+      header { padding: 24px 20px 18px; }
+      header h1 { font-size: 26px; }
+      header p { font-size: 13px; }
+
+      .controls { padding: 12px 14px 10px; }
+      #søk { padding: 10px 14px; font-size: 15px; margin-bottom: 9px; }
+      .filter-btn { padding: 7px 13px; font-size: 12.5px; }
+      .toggle-row { gap: 6px; }
+      .toggle-row label {
+        flex: 1 1 0;
+        justify-content: center;
+        padding: 10px 12px;
+        font-size: 13.5px;
+      }
+      #teller {
+        flex: 1 0 100%;
+        margin: 4px 0 0;
+        text-align: right;
+      }
+
       .table-wrap { padding: 6px 14px 0; }
       table, tbody, tr, td { display: block; width: 100%; }
       thead { display: none; }
@@ -213,9 +270,7 @@
         letter-spacing: -0.2px;
         line-height: 1.25;
       }
-      tr.group-head.rest td { border-left-color: #1e40af; }
       tr.group-head:first-child td { margin-top: 6px; }
-      tr.group-head .rest-label { margin: 0 8px 2px 0; }
 
       tr.dish {
         position: relative;
@@ -234,7 +289,7 @@
         line-height: 1.3;
         color: #1a3a2a;
         margin-bottom: 7px;
-        padding-right: 64px;
+        padding-right: 58px;
       }
       td.besk { font-size: 14px; line-height: 1.55; margin-bottom: 12px; }
       td.kjennetegn { line-height: 1.9; }
@@ -242,17 +297,16 @@
       td.kjennetegn .ingen { display: none; }
       td.pris {
         position: absolute;
-        top: 15px;
-        right: 16px;
+        top: 16px;
+        right: 18px;
         width: auto;
-        background: #1a3a2a;
-        color: #fff;
-        padding: 4px 12px;
-        border-radius: 8px;
-        font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.2px;
-        line-height: 1.5;
+        background: transparent;
+        color: #1a3a2a;
+        padding: 0;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -0.2px;
+        line-height: 1;
       }
     }
   </style>
@@ -571,7 +625,7 @@ function render() {
     const erRestaurant = gruppe.restaurant;
 
     html += `<tr class="group-head${erRestaurant ? " rest" : ""}">
-      <td colspan="4">${erRestaurant ? `<span class="rest-label">🍽 Gladmat på restaurant</span>` : ""}${gruppe.sted}</td>
+      <td colspan="4">${gruppe.sted}${erRestaurant ? `<span class="rest-label">🍽 Gladmat på restaurant</span>` : ""}</td>
     </tr>`;
 
     gruppe.retter.forEach((r) => {
