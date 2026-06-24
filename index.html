@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gladmatretten 2026</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #fafaf8;
+      margin: 0;
+      padding: 0 0 48px;
+      color: #111;
+    }
+    header {
+      background: linear-gradient(135deg, #1a3a2a 0%, #2d5a3d 60%, #3d7a52 100%);
+      color: #fff;
+      padding: 32px 24px 24px;
+      text-align: center;
+    }
+    header .eyebrow {
+      font-size: 12px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      opacity: 0.7;
+      margin-bottom: 8px;
+    }
+    header h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+    header p { margin: 8px 0 0; opacity: 0.8; font-size: 14px; }
+    .header-pills {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+    .header-pill {
+      background: rgba(255,255,255,0.15);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 13px;
+    }
+
+    /* Controls */
+    .controls {
+      background: #fff;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 14px 18px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    }
+    #søk {
+      width: 100%;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #d1d5db;
+      font-size: 14px;
+      margin-bottom: 10px;
+      outline: none;
+      color: #111;
+      font-family: inherit;
+    }
+    #søk:focus { border-color: #2d5a3d; }
+    .filter-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .filter-btn {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .toggle-row {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .toggle-row label {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 13px;
+      cursor: pointer;
+      color: #374151;
+    }
+    .toggle-row input[type=checkbox] { accent-color: #1a3a2a; }
+    #teller {
+      margin-left: auto;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    /* Tabell */
+    .table-wrap {
+      padding: 18px 16px 0;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    thead tr {
+      background: #1a3a2a;
+      color: #fff;
+    }
+    thead th {
+      text-align: left;
+      padding: 10px 14px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    thead th:first-child { border-radius: 8px 0 0 0; min-width: 155px; }
+    thead th:nth-child(2) { min-width: 180px; }
+    thead th:nth-child(3) { min-width: 255px; }
+    thead th:nth-child(4) { border-radius: 0 8px 0 0; min-width: 175px; }
+    thead th:last-child { text-align: right; min-width: 60px; }
+
+    tbody tr { border-bottom: 1px solid #e5e7eb; }
+    tbody td { padding: 10px 14px; vertical-align: top; }
+    td.navn { font-weight: 700; }
+    td.rett-navn { font-weight: 600; }
+    td.besk { color: #4b5563; line-height: 1.5; }
+    td.pris { text-align: right; font-weight: 700; color: #1a3a2a; white-space: nowrap; }
+    .rest-label {
+      font-size: 11px;
+      display: block;
+      color: #6b7280;
+      font-weight: 400;
+      margin-bottom: 2px;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-right: 3px;
+      margin-bottom: 2px;
+      white-space: nowrap;
+      border: 1px solid;
+    }
+    .ingen { color: #d1d5db; font-size: 12px; }
+
+    #tom-melding {
+      text-align: center;
+      padding: 40px;
+      color: #9ca3af;
+    }
+    footer {
+      text-align: center;
+      margin-top: 32px;
+      color: #9ca3af;
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Stavanger Matfestival</div>
+  <h1>Gladmat 2026</h1>
+  <p id="header-sub">Gladmatretter til 50 eller 75 kr</p>
+  <div class="header-pills">
+    <span class="header-pill" id="pill-veg"></span>
+    <span class="header-pill" id="pill-rest"></span>
+  </div>
+</header>
+
+<div class="controls">
+  <input type="text" id="søk" placeholder="Søk etter sted eller rett…">
+  <div class="filter-row" id="filter-row"></div>
+  <div class="toggle-row">
+    <label><input type="checkbox" id="vis-festival" checked> Festival-stands</label>
+    <label><input type="checkbox" id="vis-restaurant" checked> 🍽 Gladmat på restaurant</label>
+    <span id="teller"></span>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <div id="tom-melding" style="display:none">Ingen retter matcher søket</div>
+  <table id="tabell">
+    <thead>
+      <tr>
+        <th>Serveringssted</th>
+        <th>Rett</th>
+        <th>Beskrivelse</th>
+        <th>Kjennetegn</th>
+        <th style="text-align:right">Pris</th>
+      </tr>
+    </thead>
+    <tbody id="tbody"></tbody>
+  </table>
+</div>
+
+<footer>Kilde: gladmat.no/gladmatretten · Data per juni 2026</footer>
+
+<script>
+const retter = [
+  // Festival-stands
+  { sted: "A. Idsøe", rett: "Wagyupølse fra Sandnes", beskrivelse: "Grillet wagyupølse med rødvinsbygotto og mostarda av tomat og rabarbra", type: ["Kjøtt"], pris: 75 },
+  { sted: "Afro Cuisine", rett: "Kjøttpier", beskrivelse: "Sprø butterdeig fylt med krydret kjøttdeig og vestafrikanske krydder", type: ["Kjøtt"], pris: 50 },
+  { sted: "Amigo", rett: "Boblevaffel", beskrivelse: "Boblevaffel med sjokolade", type: [], pris: 75 },
+  { sted: "Antica Salumeria", rett: "Ostestikk", beskrivelse: "Ostebit", type: [], pris: 75 },
+  { sted: "Baked by Amare", rett: "Addis Gold – Etiopisk-inspirert signaturcookie", beskrivelse: "Cookie med sjokolade, karamell og varme krydder inspirert av Etiopia", type: ["Vegetarisk"], pris: 50 },
+  { sted: "Bakelab Ida, Eirin & Synnøve", rett: "Forbidden fruit", beskrivelse: "Kladdkake med appelsincurd og salt lakris", type: [], pris: 75 },
+  { sted: "Bare Kjeks", rett: "Brunost & Rabarbra Kjeks-sandwich", beskrivelse: "Kjeks med brunostmousse, rabarbracoulis og Havsnø-havsalt", type: [], pris: 75 },
+  { sted: "Better Empanadas", rett: "Empanada", beskrivelse: "Empanada med dip", type: [], pris: 75 },
+  { sted: "Borgund Chili", rett: "Heite lærdalspoteter", beskrivelse: "Steikte lærdalspoteter med chorizo, ost, løk og chilisaus", type: ["Glutenfritt"], pris: 75 },
+  { sted: "Brennholen Gård", rett: "Spekeskål med spekepølse og roastbeef", beskrivelse: "Roastbeef av Black Angus, spekepølse og bjørnepølse med tyttebærrømme", type: ["Kjøtt"], pris: 75 },
+  { sted: "Chili Chocolate", rett: "Tropisk sjokoladedrøm", beskrivelse: "Karamell- og sjokolademousse med mangochutney og brownie", type: [], pris: 75 },
+  { sted: "Coco Mexican Tacos", rett: "Birria taco", beskrivelse: "Langtidskokt storfekjøtt med smeltet ost i sprø tortilla, servert med consommé", type: ["Kjøtt"], pris: 75 },
+  { sted: "Dalen Lefsebakeri", rett: "Nordlandslefse", beskrivelse: "Hjemmebakt lefse med kremost og rørte bringebær", type: [], pris: 50 },
+  { sted: "Dutch Cheeseman", rett: "Cheese mix", beskrivelse: "Ulike typer ost", type: [], pris: 75 },
+  { sted: "Egersund Is og Sjokoladefabrikk", rett: "Pinnekjøttis", beskrivelse: "Gelatoinspirert vaniljeis med krokan av pinnekjøtt fra Håland Kjøtt", type: [], pris: 75 },
+  { sted: "Eros", rett: "Falafel", beskrivelse: "Hjemmelaget falafel", type: [], pris: 75 },
+  { sted: "Espresso Catering", rett: "Dobbel espresso – Scarlet Extreme fra Colombia", beskrivelse: "Co-fermentert espresso fra Huila med røde bær-noter", type: ["Laktosefritt", "Vegan", "Vegetarisk"], pris: 50 },
+  { sted: "Euro Cheese", rett: "Parmaskinke", beskrivelse: "80g autentisk italiensk parmaskinke, tynt skåret", type: ["Glutenfritt", "Kjøtt", "Laktosefritt"], pris: 75 },
+  { sted: "Fatland / Gamle Rogaland", rett: "Fatland brisket-burger", beskrivelse: "Langtidsbakt brisket i briochebrød med syltede grønnsaker og chilicrunchmayo", type: ["Kjøtt"], pris: 75 },
+  { sted: "Fiesta", rett: "Lammegryte med kålstuing", beskrivelse: "Rogalandslam med kålstuing, jærpoteter, tyttebær og fløtesaus", type: ["Kjøtt"], pris: 75 },
+  { sted: "Fisketorget | Matboden-gruppen", rett: "Snøkrabbe «Skagen»", beskrivelse: "Snøkrabbe med asiatiske smaker, peppersaus, reddik, koriander og mynte", type: ["Glutenfritt", "Sjømat"], pris: 75 },
+  { sted: "Fjorden Sjokolade", rett: "Sekslags drøm", beskrivelse: "Kake med seks lag: sjokoladebunn, mandelkrønsj, vaniljemousse, sjokolademousse og ganache", type: ["Glutenfritt"], pris: 75 },
+  { sted: "Fresh new corn dogs", rett: "Nacho cheese fries", beskrivelse: "Pommes frites med nachoostsaus", type: [], pris: 75 },
+  { sted: "Garlic Grater", rett: "Hvitløksbrød", beskrivelse: "Hvitløksbrød", type: [], pris: 50 },
+  { sted: "Georgisk mat", rett: "Khinkali", beskrivelse: "Georgiske dumplings fylt med krydret storfekjøtt, løk og koriander", type: ["Kjøtt"], pris: 50 },
+  { sted: "Gladmatskolen", rett: "Gulrot Doughnut med Gulrotmarmelade & vaniljekrem", beskrivelse: "Nystekt doughnut med gulrotmarmelade og pisket vaniljekrem", type: [], pris: 75 },
+  { sted: "Godt Og Hjemmelaget Bakeri", rett: "Kaffe og lefsebit", beskrivelse: "Konfektlefse med kanel, melis, smør og fløtemysost. Inkl. kaffe", type: ["Vegetarisk"], pris: 50 },
+  { sted: "Gourmet Bakeri Lenkimiene – Byparken", rett: "Kanelkake med sakotis-smuler", beskrivelse: "Saftig kanelkake med honning, bærsyltetøy og litauiske sakotis-smuler", type: [], pris: 75 },
+  { sted: "Hjelmeland Naturlegvis", rett: "Tataki av laks med jordbær og reddik", beskrivelse: "Raskt grillet laks med søte jordbær og pepperaktig reddik", type: ["Sjømat"], pris: 75 },
+  { sted: "Hotel Victoria & Sola Strand Hotel", rett: "Bacalao Trompe-l'œil + Smak av Sola", beskrivelse: "Dekonstruert bacalao med klippfisk-confit / Sildetartar med Hardangereple og dill", type: ["Sjømat"], pris: 75 },
+  { sted: "Ibérico Español", rett: "Rundstykke med iberisk skinke", beskrivelse: "Ferskt rundstykke med håndskåret spansk iberisk skinke", type: ["Kjøtt"], pris: 75 },
+  { sted: "Italienske bakverk", rett: "Cannoli", beskrivelse: "2 stk cannoli fra Italia", type: ["Vegetarisk"], pris: 50 },
+  { sted: "Jærbakeren Arne Johannesen", rett: "Jysla Gode Boller", beskrivelse: "Sammenbakt skillingsbolle med ulike toppings og Tine-drikke", type: [], pris: 50 },
+  { sted: "Kandal Ysteri Og Gardsmat", rett: "Kandalsvaffel", beskrivelse: "Vaffel med Kandalsost, brun geitost fra eget ysteri", type: ["Vegetarisk"], pris: 50 },
+  { sted: "Kjøkkenmagi", rett: "Vilt og vakkert – makrontrio fra Rogalandsnaturen", beskrivelse: "Trio av håndverksmakroner inspirert av lokale oster og ville vekster", type: [], pris: 75 },
+  { sted: "Kremmer'N", rett: "Spekemat-tallerken", beskrivelse: "Tallerken med spekepølser, potetsalat og flatbrød", type: ["Kjøtt"], pris: 75 },
+  { sted: "La churreria de Manolo", rett: "Churros", beskrivelse: "To spanske churros med sukker", type: [], pris: 50 },
+  { sted: "La Paisana", rett: "Nordic fusion ostekake", beskrivelse: "Kremet baskisk-inspirert ostekake med lokal rabarbra", type: [], pris: 75 },
+  { sted: "Lakrisboden", rett: "Lakris", beskrivelse: "Lakris", type: [], pris: 75 },
+  { sted: "Landsbysmak", rett: "Cookies", beskrivelse: "Håndlagde amerikanske cookies med ulike toppings", type: [], pris: 50 },
+  { sted: "Landsbysmak", rett: "Dumplings (pierogi)", beskrivelse: "Polske pierogi med kylling/linser eller poteter og ost", type: ["Vegetarisk"], pris: 50 },
+  { sted: "Lokma", rett: "ChocoBerry Lokma", beskrivelse: "Ferskfriterte lokma med sjokolade og jordbær", type: [], pris: 75 },
+  { sted: "Made in Korea", rett: "Korean Charcoal BBQ", beskrivelse: "Svinenakke i galbi-marinade på kullgrill med vårløksalat og wasabi mayo", type: ["Kjøtt"], pris: 75 },
+  { sted: "Madla Handelslag", rett: "Limousinburger", beskrivelse: "Burger av limousinkjøtt fra Fatland i briochebrød med bacon og BBQ-saus", type: ["Kjøtt"], pris: 75 },
+  { sted: "Mat fra Brasil", rett: "Kroketter", beskrivelse: "Kroketter med kylling, ost og mais & spinat", type: [], pris: 75 },
+  { sted: "Matboden | Matboden-gruppen", rett: "Pasjonsfrukt «fløyel»", beskrivelse: "Pasjonsfrukt med Jerseymeieriet-yoghurt, yuzu-jordbær og karamellisert hvit sjokolade", type: ["Glutenfritt", "Vegetarisk"], pris: 75 },
+  { sted: "Matjes", rett: "Matjes i lompe", beskrivelse: "Potetkake med jomfrusildfilet, rømme, rødbeter og løk", type: ["Sjømat"], pris: 50 },
+  { sted: "Matsaya Boba tea and street food", rett: "Roasted Boba Ice Cream", beskrivelse: "Vaniljeis med brunt sukker og ristede tapioca-perler", type: [], pris: 75 },
+  { sted: "Matskattar i Suldal", rett: "Godt hjort frå Suldal", beskrivelse: "Langtidsbakt hjort med oksetalg, rabarbra, ugrasmajones og mesk-knekk", type: ["Kjøtt"], pris: 75 },
+  { sted: "Mikals Laks", rett: "Varmrøykt laksewrap", beskrivelse: "Varmrøykt laks i potetkake med kremost fra Ystepikene og sylta rødløk", type: ["Sjømat"], pris: 75 },
+  { sted: "Miyako Sushi", rett: "Shoga jalapeño kveite", beskrivelse: "Grillet kveite med ingefær-jalapeño dressing, daikon og mikrogrønt", type: ["Sjømat"], pris: 75 },
+  { sted: "Monella", rett: "Dolce Vita", beskrivelse: "Napolitansk pizza fritta fylt med Nutella og fersk ricotta", type: [], pris: 75 },
+  { sted: "Monky's", rett: "Mini classic corn dog", beskrivelse: "Innbakt kyllingpølse med fritert ost, koreansk street food", type: ["Kjøtt"], pris: 75 },
+  { sted: "Mor Sigfrid – Byparken", rett: "Lefse", beskrivelse: "Lefser med smørkrem og gombe (også glutenfri variant)", type: ["Glutenfritt"], pris: 50 },
+  { sted: "Mr Bellwaffle & Magic Is", rett: "Plain waffle", beskrivelse: "Autentisk belgisk vaffel med sukker og Nutella", type: [], pris: 75 },
+  { sted: "MS Sandnes", rett: "Skalldyr-cocktail", beskrivelse: "Kongekrabbe, sjøkreps og isbergsalat med dressing", type: ["Sjømat"], pris: 75 },
+  { sted: "Norway Life Churros – Byparken", rett: "Churros", beskrivelse: "Fem churros med sukker", type: [], pris: 75 },
+  { sted: "Oakberry", rett: "Gladmat Bowl", beskrivelse: "Økologisk açaí med granola, chiapudding, kokosflak og mangopuré. Vegansk", type: ["Laktosefritt", "Vegan"], pris: 75 },
+  { sted: "Potatoguys", rett: "Mini fries", beskrivelse: "Pommes frites med toppings", type: [], pris: 75 },
+  { sted: "Potetbua", rett: "Vegetar-potet", beskrivelse: "Baktpotet med kryddersmør, ost, mais og hvitløksdressing", type: ["Glutenfritt", "Vegetarisk"], pris: 75 },
+  { sted: "Pylsebussen", rett: "Pølse med bacon", beskrivelse: "Klassisk pølse med bacon", type: ["Kjøtt"], pris: 50 },
+  { sted: "Restauration", rett: "Gabbas ramsalte lapskaus", beskrivelse: "Lapskaus inspirert av emigrantenes proviant ved avreisen mot New York i 1825", type: ["Kjøtt"], pris: 75 },
+  { sted: "Sabrura Sushi", rett: "Sushiburrito", beskrivelse: "Sushiburrito fylt med laks, scampi eller kylling", type: ["Kjøtt", "Sjømat"], pris: 75 },
+  { sted: "Sam's sandwich bar", rett: "SAM'S Funky Chilicrisp Beef Sandwich", beskrivelse: "Focaccia med ramsløkolje, biff, chilicrisp, mango, bacon mayo og BBQ chips", type: ["Kjøtt"], pris: 75 },
+  { sted: "Sandi Cakes", rett: "Polka", beskrivelse: "Saint-Honoré-inspirert dessert med lokal rogalandsvanilje og karamell", type: [], pris: 75 },
+  { sted: "Sando", rett: "Crispy chicken sando", beskrivelse: "Crispy kylling med chili mayo, asiatisk coleslaw og grillet ost", type: ["Kjøtt"], pris: 75 },
+  { sted: "Seid Grill & Cocktailbar | Matboden-gruppen", rett: "Grillet svineribbe fra Nyyyt", beskrivelse: "Grillet svineribbe med sprø svor, sommerkål og fetaost fra Ystepikene", type: ["Glutenfritt", "Kjøtt"], pris: 75 },
+  { sted: "Senfony Bakehouse", rett: "Tiramisu", beskrivelse: "Italiensk klassisk tiramisu", type: [], pris: 75 },
+  { sted: "Show-teltet", rett: "Plukkfisk", beskrivelse: "Klippfisk med poteter, gulrot, purreløk, smør og fløte. Serveres med bacon og flatbrød", type: ["Sjømat"], pris: 75 },
+  { sted: "Simple & delicious", rett: "Langtidskokt høyryggtaco", beskrivelse: "Langtidskokt høyrygg i tortilla med syltet kål og rødløk", type: ["Kjøtt"], pris: 75 },
+  { sted: "Simply Pinoy", rett: "Takoyaki – japanske streetfood-kuler", beskrivelse: "Sprø kuler fylt med blekksprut, toppet med japansk saus, mayo og umami-toppings", type: ["Sjømat"], pris: 75 },
+  { sted: "Smash & Roll", rett: "Spring rolls", beskrivelse: "Kyllingvårruller", type: ["Kjøtt"], pris: 75 },
+  { sted: "Solatorget", rett: "Gulrotsorbet", beskrivelse: "Gulrotsorbet med surdeigsgranola, rødbetekaviar og jordbær", type: [], pris: 75 },
+  { sted: "Spanias turistkontor", rett: "Marmitako", beskrivelse: "Tradisjonell baskisk tunfiskgryte med poteter, paprika og tomat", type: ["Sjømat"], pris: 50 },
+  { sted: "Spanish porras", rett: "Spanish Porras", beskrivelse: "Churros", type: [], pris: 75 },
+  { sted: "Spekeboden", rett: "Spekemat", beskrivelse: "Spekemat", type: ["Kjøtt"], pris: 75 },
+  { sted: "Spiseriet", rett: "Grillet flank steak fra Nyyyt", beskrivelse: "Grillet flank steak med jalapeño, vårløk og sesam", type: ["Kjøtt", "Laktosefritt"], pris: 75 },
+  { sted: "Sunt og balansert", rett: "Acaibowl with homemade granola", beskrivelse: "Açaisorbet med mandelsmørgranola, mandelsmør og frisk frukt", type: [], pris: 75 },
+  { sted: "Sveahjort", rett: "Akevittgravet hjortefilet med tyttebærrømme", beskrivelse: "Akevittgravet hjortefilet med flatbrød og tyttebærrømme", type: ["Kjøtt"], pris: 75 },
+  { sted: "Tyrkisk Matmesse – Byparken", rett: "Çiğ Köfte – Krydret Bulgurwrap", beskrivelse: "Tradisjonell tyrkisk bulgurwrap med tomatsaus, krydder og granateplesirup. Vegansk", type: ["Laktosefritt", "Vegan", "Vegetarisk"], pris: 75 },
+  { sted: "Vafleriet", rett: "Banana Strawberry Cream Cake", beskrivelse: "Banankake med krem og friske jordbær", type: [], pris: 75 },
+  { sted: "Viet Tasty", rett: "Grillspyd", beskrivelse: "Grillspyd med løkring", type: [], pris: 75 },
+  { sted: "Vietnam mat", rett: "Vietnam mat", beskrivelse: "Vårruller, kyllingspyd, kyllingkarri, vegansk karri, stekt ris og banh bao", type: ["Kjøtt", "Laktosefritt", "Vegan"], pris: 75 },
+  { sted: "Vingtor | Matboden-gruppen", rett: "Confitert brosme «ras el hanout»", beskrivelse: "Confitert brosme med gulbete, smørsaus, shitake, masago og brent purre", type: ["Glutenfritt", "Sjømat"], pris: 75 },
+  { sted: "Waffle Factory", rett: "Belgiske vafler", beskrivelse: "Nystekte belgiske vafler med softis og candy apple", type: ["Vegetarisk"], pris: 75 },
+  { sted: "Wild Fire Foods", rett: "Wild Fire-pølser", beskrivelse: "Grillpølser med jalapeño salsa, sriracha, sweet chili, BBQ og mango habanero", type: ["Kjøtt"], pris: 75 },
+  { sted: "Yips Pedersgata", rett: "Svinedumpling med laksacurry", beskrivelse: "Yips signatur svinedumplings med laksa- og skalldyrcurry", type: ["Kjøtt"], pris: 75 },
+  { sted: "Yips Sandnes", rett: "BBQ Chicken Bao", beskrivelse: "Fritert kylling med BBQ-saus og spicy coleslaw i bao", type: ["Kjøtt"], pris: 75 },
+  { sted: "Youngs Thai", rett: "Vårruller", beskrivelse: "To stykk vårruller", type: [], pris: 75 },
+  { sted: "Ystepikene", rett: "Ystepikeplanken", beskrivelse: "Smaksreise med seks lokale Jæren-oster med tilbehør og lokale råvarer", type: [], pris: 75 },
+  { sted: "Yuns Kitchen", rett: "Buldak deopbap", beskrivelse: "Krydret kylling med grønnsaker og ris", type: ["Kjøtt"], pris: 75 },
+  { sted: "Zouq Sandnes", rett: "Dahi Bhalle", beskrivelse: "Linseboller i kjølig yoghurt med tamarind, mynte og aromatiske krydder", type: ["Vegetarisk"], pris: 75 },
+  { sted: "Zouq Stavanger", rett: "Dahi Bhalle", beskrivelse: "Linseboller i kjølig yoghurt med tamarind, mynte og aromatiske krydder", type: ["Vegetarisk"], pris: 75 },
+  { sted: "Zouq TikTok Virals", rett: "Jordbærmatcha", beskrivelse: "Frisk drikk med matcha og jordbær, servert med havremelk", type: [], pris: 75 },
+  { sted: "Øy-is", rett: "Sjøreist – is og bær fra Kalvøy", beskrivelse: "Vaniljeis og jordbærsorbet med nyplukka jordbær og solbærcoulis fra Kalvøy", type: [], pris: 75 },
+
+  // Gladmat på restaurant
+  { sted: "An Nam", rett: "Grilled Lemongrass Beef", beskrivelse: "Rispinnenudler med grillet sitrongrassbiff, peanøtter, urter og ankjosvissaus", type: ["Kjøtt", "Laktosefritt"], pris: 75, restaurant: true },
+  { sted: "Bacchus Café", rett: "Blinis", beskrivelse: "Blinis med ørretrogn, pepperotrømme, karse, syltet rødløk og havtrøffel", type: ["Sjømat"], pris: 75, restaurant: true },
+  { sted: "Bellies", rett: "Bellies Icecream Bar", beskrivelse: "Iskrembar på tare-is, solbær og sjokolade. Laktosefri og glutenfri", type: ["Glutenfritt", "Laktosefritt", "Vegan", "Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Bravo", rett: "Poteter med mysesaus", beskrivelse: "Lokale poteter med smørsaus basert på myse fra Stavanger Ysteri", type: ["Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Delicatessen Tapasbar Stavanger", rett: "Fritert høyrygg croqueta", beskrivelse: "Croqueta av nattbraisert høyrygg med coleslaw, Padrón-majones og syltede jalapeños", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Fortou", rett: "Chilli sin carne", beskrivelse: "Focaccia med biff – en eksplosjon av søtt, spicy, salt og surt", type: ["Glutenfritt", "Laktosefritt", "Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Gaffel & Karaffel", rett: "Tunfisk tartar", beskrivelse: "Silkemyk tunfisk med avokado, sprø wonton, nori og kimchi-majones", type: ["Glutenfritt", "Laktosefritt", "Sjømat"], pris: 75, restaurant: true },
+  { sted: "Harry Pepper", rett: "Kveite-ceviche", beskrivelse: "Ceviche av kveite med agurk, fennikel og peanøttsalsa", type: ["Glutenfritt", "Laktosefritt", "Sjømat"], pris: 75, restaurant: true },
+  { sted: "Los Tacos Stavanger", rett: "Quesabirria", beskrivelse: "Hvetetortilla med langtidskokt birria, smeltet ost og birria consommé til dipping", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Made in Korea / The K-Chicken", rett: "Kkanpung Fighting", beskrivelse: "Crispy Korean Fried Chicken i hvitløk- og søtchilisaus med kålsalat og wasabi mayo", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Meze Restaurant", rett: "Hunkar Begendi", beskrivelse: "Mørt lammekjøtt på kremet auberginepuré med ost og smør", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Molinå Bakery & Eatery", rett: "Zabaione Mascarpone", beskrivelse: "Mascarponekrem med ristede steinsfrukter, rug- og speltkrumme og brødmiso butterscotch", type: ["Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Ostehuset øst", rett: "Hotdog av gulrot", beskrivelse: "Grillet gulrot i brioche med ramsløksmajones, puffet quinoa og grønt", type: ["Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Panzanella Pizzeria", rett: "Calabrese", beskrivelse: "Pizzastykke med salsiccia, fermentert chilli fra Calabria, cherry-tomater og salsa verde", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Proto", rett: "OPA! HALLOUMI", beskrivelse: "Grillet kypriotisk halloumi med gresk honning, sitron og oregano", type: ["Glutenfritt", "Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "SAM'S sandwich bar", rett: "SAM'S Beef Sandwich", beskrivelse: "Focaccia med biff – søtt, spicy, salt og surt i harmoni", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Seoul Søstre", rett: "Koreansk BBQ Short Rib + Bibimnudler", beskrivelse: "Koreanske BBQ-marinerte okseribber med bokhvetenudler og wasabi-soyadressing", type: ["Kjøtt", "Laktosefritt"], pris: 75, restaurant: true },
+  { sted: "Siddis Gelato", rett: "Dessert med honning og rabarbra", beskrivelse: "Gelato der honning og rabarbra er nøkkelelementene", type: ["Vegetarisk"], pris: 75, restaurant: true },
+  { sted: "Sirkus Renaa", rett: "Vannbakkels", beskrivelse: "Vannbakkels med sitronkrem smakssatt med grønn te og sitronverbena", type: [], pris: 50, restaurant: true },
+  { sted: "Tango", rett: "Iskrem med Caviar", beskrivelse: "Tonkabønne-iskrem med mangogelé og Rossini Caviar Oscietra", type: [], pris: 75, restaurant: true },
+  { sted: "Tom And Lello", rett: "Moscovy andebryst", beskrivelse: "Andebryst med koji-smørpuré, grønnkål og fermentert garumsaus", type: ["Kjøtt"], pris: 75, restaurant: true },
+  { sted: "Veranda", rett: "Skagentoast", beskrivelse: "Surdeigsbrød med sjøkreps, reker, løyrom fra Domstein, dill og egenprodusert skagenrøre", type: ["Sjømat"], pris: 75, restaurant: true },
+  { sted: "Yips", rett: "Yips «Heia Norge» kveite", beskrivelse: "Gin & ponzu-marinert kveite med cashew-misokrem, rabarbra, jordbær og basilikumolje", type: ["Sjømat"], pris: 75, restaurant: true },
+];
+
+const typeColors = {
+  "Vegetarisk": { bg: "#d1fae5", text: "#065f46", border: "#6ee7b7" },
+  "Vegan":       { bg: "#bbf7d0", text: "#14532d", border: "#4ade80" },
+  "Kjøtt":       { bg: "#fee2e2", text: "#7f1d1d", border: "#fca5a5" },
+  "Sjømat":      { bg: "#dbeafe", text: "#1e3a8a", border: "#93c5fd" },
+  "Glutenfritt": { bg: "#fef3c7", text: "#78350f", border: "#fcd34d" },
+  "Laktosefritt":{ bg: "#f3e8ff", text: "#4c1d95", border: "#c4b5fd" },
+};
+
+const ALLE_TYPER = ["Vegetarisk", "Vegan", "Kjøtt", "Sjømat", "Glutenfritt", "Laktosefritt"];
+const isVegetar = r => r.type.includes("Vegetarisk") || r.type.includes("Vegan");
+
+// State
+let aktiveFilter = new Set(); // tom = vis alle
+let visFestival = true;
+let visRestaurant = true;
+let søkTekst = "";
+
+// Header stats
+const vegSteder = [...new Set(retter.filter(isVegetar).map(r => r.sted))];
+document.getElementById("header-sub").textContent =
+  `Gladmatretter til 50 eller 75 kr · ${retter.length} retter · ${[...new Set(retter.map(r => r.sted))].length} serveringssteder`;
+document.getElementById("pill-veg").textContent = `🥦 ${vegSteder.length} steder med vegetar/vegan`;
+document.getElementById("pill-rest").textContent = `🍽 ${retter.filter(r => r.restaurant).length} retter på restaurant`;
+
+function styleFilterBtn(btn, active) {
+  const t = btn.dataset.type;
+  const c = typeColors[t];
+  if (active) {
+    btn.style.background = "#1a3a2a";
+    btn.style.color = "#fff";
+    btn.style.borderColor = "#1a3a2a";
+  } else {
+    btn.style.background = c ? c.bg : "#f3f4f6";
+    btn.style.color = c ? c.text : "#374151";
+    btn.style.borderColor = c ? c.border : "#d1d5db";
+  }
+}
+
+// Build filter buttons
+const filterRow = document.getElementById("filter-row");
+
+// "Alle" reset button
+const alleBtn = document.createElement("button");
+alleBtn.className = "filter-btn";
+alleBtn.textContent = "Alle";
+alleBtn.dataset.type = "Alle";
+styleFilterBtn(alleBtn, true);
+alleBtn.addEventListener("click", () => {
+  aktiveFilter.clear();
+  document.querySelectorAll(".filter-btn").forEach(b => styleFilterBtn(b, b.dataset.type === "Alle"));
+  render();
+});
+filterRow.appendChild(alleBtn);
+
+ALLE_TYPER.forEach(t => {
+  const btn = document.createElement("button");
+  btn.className = "filter-btn";
+  btn.textContent = t;
+  btn.dataset.type = t;
+  styleFilterBtn(btn, false);
+  btn.addEventListener("click", () => {
+    if (aktiveFilter.has(t)) {
+      aktiveFilter.delete(t);
+    } else {
+      aktiveFilter.add(t);
+    }
+    // Update button styles
+    const ingenValgt = aktiveFilter.size === 0;
+    document.querySelectorAll(".filter-btn").forEach(b => {
+      if (b.dataset.type === "Alle") {
+        styleFilterBtn(b, ingenValgt);
+      } else {
+        styleFilterBtn(b, aktiveFilter.has(b.dataset.type));
+      }
+    });
+    render();
+  });
+  filterRow.appendChild(btn);
+});
+
+// Event listeners
+document.getElementById("søk").addEventListener("input", e => {
+  søkTekst = e.target.value.toLowerCase();
+  render();
+});
+document.getElementById("vis-festival").addEventListener("change", e => {
+  visFestival = e.target.checked;
+  render();
+});
+document.getElementById("vis-restaurant").addEventListener("change", e => {
+  visRestaurant = e.target.checked;
+  render();
+});
+
+function makeBadge(type) {
+  const c = typeColors[type] || { bg: "#f3f4f6", text: "#374151", border: "#d1d5db" };
+  return `<span class="badge" style="background:${c.bg};color:${c.text};border-color:${c.border}">${type}</span>`;
+}
+
+function render() {
+  const filtrert = retter.filter(r => {
+    const matchFilter = aktiveFilter.size === 0 || r.type.some(t => aktiveFilter.has(t));
+    const matchKategori = r.restaurant ? visRestaurant : visFestival;
+    const matchSøk = !søkTekst ||
+      r.sted.toLowerCase().includes(søkTekst) ||
+      r.rett.toLowerCase().includes(søkTekst) ||
+      r.beskrivelse.toLowerCase().includes(søkTekst);
+    return matchFilter && matchKategori && matchSøk;
+  });
+
+  document.getElementById("teller").textContent =
+    `Viser ${filtrert.length} av ${retter.length} retter`;
+
+  // Group by sted
+  const grouped = {};
+  filtrert.forEach(r => {
+    const key = r.sted + (r.restaurant ? "__rest" : "");
+    if (!grouped[key]) grouped[key] = { sted: r.sted, restaurant: !!r.restaurant, retter: [] };
+    grouped[key].retter.push(r);
+  });
+
+  const sortedKeys = Object.keys(grouped).sort((a, b) => {
+    const na = grouped[a].sted.replace(/[ÆæØøÅå]/g, c =>
+      ({ Æ:"AE",æ:"ae",Ø:"O",ø:"o",Å:"AA",å:"aa" })[c] || c);
+    const nb = grouped[b].sted.replace(/[ÆæØøÅå]/g, c =>
+      ({ Æ:"AE",æ:"ae",Ø:"O",ø:"o",Å:"AA",å:"aa" })[c] || c);
+    return na.localeCompare(nb);
+  });
+
+  const tbody = document.getElementById("tbody");
+  const tomMelding = document.getElementById("tom-melding");
+  const tabell = document.getElementById("tabell");
+
+  if (sortedKeys.length === 0) {
+    tbody.innerHTML = "";
+    tomMelding.style.display = "block";
+    tabell.style.display = "none";
+    return;
+  }
+
+  tomMelding.style.display = "none";
+  tabell.style.display = "";
+
+  let html = "";
+  sortedKeys.forEach((key, si) => {
+    const gruppe = grouped[key];
+    const erRestaurant = gruppe.restaurant;
+
+    gruppe.retter.forEach((r, ri) => {
+      const erVeg = isVegetar(r);
+      const rowBg = erVeg
+        ? (si % 2 === 0 ? "#f0fdf4" : "#ecfdf5")
+        : (si % 2 === 0 ? "#fff" : "#f9fafb");
+      const cellBg = erVeg
+        ? (si % 2 === 0 ? "#f0fdf4" : "#ecfdf5")
+        : (si % 2 === 0 ? "#fff" : "#f9fafb");
+      const borderRight = erVeg ? "3px solid #6ee7b7" : "1px solid #e5e7eb";
+      const navnFarge = erRestaurant ? "#1e40af" : "#1a3a2a";
+
+      html += `<tr style="background:${rowBg}">`;
+
+      if (ri === 0) {
+        html += `<td class="navn" rowspan="${gruppe.retter.length}"
+          style="background:${cellBg};border-right:${borderRight};color:${navnFarge}">
+          ${erRestaurant ? `<span class="rest-label">🍽 Restaurant</span>` : ""}
+          ${gruppe.sted}
+        </td>`;
+      }
+
+      const badges = r.type.length
+        ? r.type.map(makeBadge).join("")
+        : `<span class="ingen">–</span>`;
+
+      html += `
+        <td class="rett-navn">${r.rett}</td>
+        <td class="besk">${r.beskrivelse}</td>
+        <td>${badges}</td>
+        <td class="pris">${r.pris} kr</td>
+      </tr>`;
+    });
+  });
+
+  tbody.innerHTML = html;
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>
