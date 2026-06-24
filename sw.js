@@ -1,4 +1,4 @@
-const VERSION = "2026-06-24-3";
+const VERSION = "2026-06-24-4";
 const CACHE = `gladmat-${VERSION}`;
 
 const PRECACHE = [
